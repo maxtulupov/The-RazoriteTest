@@ -28,9 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	
 	const slidersLoad = () => {
 
-		// const urlServer = 'server-slides.json';
-		// const urlServerlikes = 'server-like.json';
-
 		const urlServer = 'https://private-anon-80b7e623ab-grchhtml.apiary-mock.com/slides';
 		// const urlServerlikes = 'https://private-anon-80b7e623ab-grchhtml.apiary-mock.com/slides/2/like';
 
@@ -117,15 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		}
 
-		const getSliders = (url, length) => fetch(url, {
-			method: "GET",
-			// mode: "no-cors",
-			headers: {
-				"Content-Type": "application/json",
-			 },
-		})
-			.then(response => {
-				if (response.status !== 200) {
+		const getSliders = (url, length) => {
+			const  request = new XMLHttpRequest();
+			request.open('GET', url);
+			request.onreadystatechange = function () {
+			if (this.readyState === 4) {
+				if (this.status !== 200) {
 					const swiperWrapper = document.querySelector('.top__wrapper.swiper-wrapper');
 					const newSlide = `
 							<div class="top__slide swiper-slide slide-top">
@@ -142,10 +136,14 @@ document.addEventListener('DOMContentLoaded', () => {
 					swiperWrapper.insertAdjacentHTML('beforeend', newSlide);
 					initSliders();
 					throw new Error('Status network not 200');
+				} else {
+					const data = JSON.parse(this.response);
+					setSliders(data, length)
 				}
-				return response.json();
-			})
-			.then(data => setSliders(data, length))
+			}
+			};
+			request.send();
+		};
 		getSliders(urlServer, 0);
 
 		const countingLikes = () => {
@@ -170,8 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
 						if (document.querySelector('.reaction-block')) {
 							let keys = Object.keys(localStorage);
 							for(let key of keys) {
-								// console.log(`${key}: ${localStorage.getItem(key)}`);
-								// console.log(document.querySelector(`#${key}`));
 								if (document.querySelector(`#${key}`)) {
 									if (!document.querySelector(`#${key}`).classList.contains('_active')) {
 										document.querySelector(`#${key}`).classList.add('_active');
@@ -181,49 +177,50 @@ document.addEventListener('DOMContentLoaded', () => {
 								}
 							}
 						}
-					}, 1000);
+					}, 1500);
 				}
 			};
 			updateLikes();
 
 			setTimeout(() => {
-				const topSlider = document.querySelector('.top__slider').swiper;
-				topSlider.on('slideChange', function () {
-					if (topSlider.activeIndex === topSlider.slides.length - 1) {
-						updateLikes();
-					}
-				});
-			}, 1500);
+				if (document.querySelector('.top__slider').swiper) {
+					const topSlider = document.querySelector('.top__slider').swiper;
+					topSlider.on('slideChange', function () {
+						if (topSlider.activeIndex === topSlider.slides.length - 1) {
+							updateLikes();
+						}
+					});
+				}
+			}, 100);
 
 			topSection.addEventListener('click', e => {
 				const target = e.target;
 
 				if (target.closest('.reaction-block__btn')) {
-					const getLikesResponse = (url) => fetch(url, {
-						method: "POST",
-						// mode: "no-cors",
-						headers: {
-							"Content-Type": "application/json",
-						 },
-					})
-					.then(response => {
-						if (response.status !== 200) {
-							openPopupAfterClick(null);
-							throw new Error('Status network not 200');
+					const getLikesResponse = (url) => {
+						const request = new XMLHttpRequest();
+						request.open('POST', url);
+						request.onreadystatechange = function () {
+						if (this.readyState === 4) {
+							if (this.status !== 200) {
+								openPopupAfterClick(null);
+								throw new Error('Status network not 200');
+							} else {
+								const data = JSON.parse(this.response);
+								const thisTargetNumberLikes = target.closest('.reaction-block').querySelector('.reaction-block__number');
+								thisTargetNumberLikes.textContent = +thisTargetNumberLikes.textContent + 1;
+								thisTargetNumberLikes.closest('.reaction-block').querySelector('.reaction-block__btn').classList.add('_active');
+								updateLikes(thisTargetNumberLikes.closest('.reaction-block').querySelector('.reaction-block__btn').id, true);
+								openPopupAfterClick(data);
+							}
 						}
-						return response.json();
-					})
-					.then(data => {
-						const thisTargetNumberLikes = target.closest('.reaction-block').querySelector('.reaction-block__number');
-						thisTargetNumberLikes.textContent = +thisTargetNumberLikes.textContent + 1;
-						thisTargetNumberLikes.closest('.reaction-block').querySelector('.reaction-block__btn').classList.add('_active');
-						updateLikes(thisTargetNumberLikes.closest('.reaction-block').querySelector('.reaction-block__btn').id, true);
-						openPopupAfterClick(data);
-					})
-
+						};
+						request.send();
+					};
 
 					const urlServerlikes = `https://private-anon-80b7e623ab-grchhtml.apiary-mock.com/slides/${target.closest('.reaction-block__btn').id.replace('slide-', '')}/like`;
 					getLikesResponse(urlServerlikes);
+
 				}
 			});
 		};
@@ -299,7 +296,6 @@ document.addEventListener('DOMContentLoaded', () => {
 					const topSlider = document.querySelector('.top__slider').swiper;
 					topSlider.on('slideChange', function () {
 						if (topSlider.activeIndex === topSlider.slides.length - 1) {
-							// console.log(topSlider.slides.length);
 							getSliders(urlServer, topSlider.slides.length);
 						}
 					});
@@ -328,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		};
 		setTimeout(() => {
 			countingLikes();
-		}, 1000);
+		}, 100);
 		// countingLikes();
 
 	};
