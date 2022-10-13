@@ -25,13 +25,14 @@ import "../../scss/base/swiper.scss";
 
 
 document.addEventListener('DOMContentLoaded', () => {
-
-	// server-slides.json
-	// https://private-anon-7d2715805e-grchhtml.apiary-mock.com/slides
 	
 	const slidersLoad = () => {
-		const urlServer = 'server-slides.json';
-		const urlServerlikes = 'server-like.json';
+
+		// const urlServer = 'server-slides.json';
+		// const urlServerlikes = 'server-like.json';
+
+		const urlServer = 'https://private-anon-80b7e623ab-grchhtml.apiary-mock.com/slides';
+		// const urlServerlikes = 'https://private-anon-80b7e623ab-grchhtml.apiary-mock.com/slides/2/like';
 
 		// Инициализация слайдеров
 		function initSliders() {
@@ -118,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		const getSliders = (url, length) => fetch(url, {
 			method: "GET",
-			mode: "no-cors",
+			// mode: "no-cors",
 			headers: {
 				"Content-Type": "application/json",
 			 },
@@ -170,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
 							let keys = Object.keys(localStorage);
 							for(let key of keys) {
 								// console.log(`${key}: ${localStorage.getItem(key)}`);
+								// console.log(document.querySelector(`#${key}`));
 								if (document.querySelector(`#${key}`)) {
 									if (!document.querySelector(`#${key}`).classList.contains('_active')) {
 										document.querySelector(`#${key}`).classList.add('_active');
@@ -179,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
 								}
 							}
 						}
-					}, 100);
+					}, 1000);
 				}
 			};
 			updateLikes();
@@ -191,15 +193,15 @@ document.addEventListener('DOMContentLoaded', () => {
 						updateLikes();
 					}
 				});
-			}, 1000);
+			}, 1500);
 
 			topSection.addEventListener('click', e => {
 				const target = e.target;
 
 				if (target.closest('.reaction-block__btn')) {
 					const getLikesResponse = (url) => fetch(url, {
-						method: "GET",
-						mode: "no-cors",
+						method: "POST",
+						// mode: "no-cors",
 						headers: {
 							"Content-Type": "application/json",
 						 },
@@ -219,6 +221,8 @@ document.addEventListener('DOMContentLoaded', () => {
 						openPopupAfterClick(data);
 					})
 
+
+					const urlServerlikes = `https://private-anon-80b7e623ab-grchhtml.apiary-mock.com/slides/${target.closest('.reaction-block__btn').id.replace('slide-', '')}/like`;
 					getLikesResponse(urlServerlikes);
 				}
 			});
@@ -295,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					const topSlider = document.querySelector('.top__slider').swiper;
 					topSlider.on('slideChange', function () {
 						if (topSlider.activeIndex === topSlider.slides.length - 1) {
-							console.log(topSlider.slides.length);
+							// console.log(topSlider.slides.length);
 							getSliders(urlServer, topSlider.slides.length);
 						}
 					});
@@ -322,7 +326,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 
 		};
-		countingLikes();
+		setTimeout(() => {
+			countingLikes();
+		}, 1000);
+		// countingLikes();
 
 	};
 	slidersLoad();
