@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					const topSlider = document.querySelector('.top__slider').swiper;
 					topSlider.on('slideChange', function () {
 						if (topSlider.activeIndex === topSlider.slides.length - 1) {
-							// console.log(topSlider.slides.length);
+							console.log(topSlider.slides.length);
 							getSliders(urlServer, topSlider.slides.length);
 						}
 					});
