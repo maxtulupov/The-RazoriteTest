@@ -1,10 +1,11 @@
 //====================================================================================================
 .top {
-	// height: 100vh;
+	height: 100vh;
+  	height: calc(var(--vh, 1vh) * 100);
 	position: relative;
 	// .top__slider
 	&__slider {
-		
+		height: 100%;
 	}
 	// .top__wrapper
 	&__wrapper {
@@ -20,7 +21,7 @@
 .slide-top {
 	position: relative;
 	max-height: 1080px;
-	height: 100vh;
+	height: 100%;
 	// .slide-top__bg
 	&__bg {
 		position: absolute;
